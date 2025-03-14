@@ -14,7 +14,7 @@ A web application that demonstrates the Luhn algorithm for credit card number va
 - Example valid and invalid card numbers
 - Educational information about the Luhn algorithm
 
-## Setup
+## Local Setup
 
 1. Create a virtual environment (recommended):
 ```bash
@@ -29,10 +29,41 @@ pip install -r requirements.txt
 
 3. Run the application:
 ```bash
-python app.py
+python api/index.py
 ```
 
 4. Open your browser and navigate to `http://localhost:5000`
+
+## Deploying to Vercel
+
+This application is configured for easy deployment to Vercel. Follow these steps:
+
+1. Install the Vercel CLI:
+```bash
+npm install -g vercel
+```
+
+2. Login to Vercel:
+```bash
+vercel login
+```
+
+3. Deploy the application:
+```bash
+vercel
+```
+
+4. For production deployment:
+```bash
+vercel --prod
+```
+
+You can also deploy directly from the Vercel dashboard:
+
+1. Push your code to a GitHub repository
+2. Go to [vercel.com](https://vercel.com) and sign in
+3. Click "New Project" and import your repository
+4. Keep the default settings and click "Deploy"
 
 ## How to Use
 
