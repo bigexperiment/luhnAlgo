@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Card Validator - Luhn Algorithm</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen py-12">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto">
+            <!-- Header -->
+            <div class="bg-white rounded-t-lg shadow-lg p-8 border-b border-gray-200">
+                <h1 class="text-3xl font-bold text-center mb-3 text-indigo-800">Credit Card Validator</h1>
+                <p class="text-gray-600 text-center">Validate credit card numbers using the Luhn algorithm</p>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="bg-white shadow-lg p-8">
+                <!-- Tabs -->
+                <div class="flex border-b mb-6">
+                    <button id="tab-validator" class="px-4 py-2 border-b-2 border-indigo-500 text-indigo-600 font-medium">Validator</button>
+                    <button id="tab-explanation" class="px-4 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700">About Luhn Algorithm</button>
+                    <button id="tab-examples" class="px-4 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700">Example Cards</button>
+                </div>
+                
+                <!-- Validator Tab -->
+                <div id="content-validator" class="tab-content">
+                    <div class="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-lg p-6 mb-8 text-white">
+                        <div class="flex items-center mb-4">
+                            <i class="fas fa-credit-card text-2xl mr-3"></i>
+                            <h2 class="text-xl font-semibold">Enter Card Details</h2>
+                        </div>
+                        <p class="text-blue-100 mb-2">Enter a credit card number to validate using the Luhn algorithm</p>
+                        
+                        <form id="validator-form" class="mt-4">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            
+                            <!-- Card Number -->
+                            <div class="mb-4">
+                                <label for="card_number" class="block text-sm font-medium text-blue-100 mb-1">Card Number</label>
+                                <input type="text" 
+                                       id="card_number" 
+                                       name="card_number" 
+                                       class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 text-gray-800"
+                                       placeholder="XXXX XXXX XXXX XXXX"
+                                       pattern="[0-9- ]+"
+                                       required>
+                            </div>
+                            
+                            <!-- Exp Date and CVC -->
+                            <div class="flex space-x-4 mb-4">
+                                <div class="w-1/2">
+                                    <label for="exp_date" class="block text-sm font-medium text-blue-100 mb-1">Expiration Date</label>
+                                    <input type="text" 
+                                           id="exp_date" 
+                                           name="exp_date" 
+                                           class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 text-gray-800"
+                                           placeholder="MM/YY">
+                                </div>
+                                <div class="w-1/2">
+                                    <label for="cvc" class="block text-sm font-medium text-blue-100 mb-1">CVC</label>
+                                    <input type="text" 
+                                           id="cvc" 
+                                           name="cvc" 
+                                           class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 text-gray-800"
+                                           placeholder="XXX"
+                                           maxlength="4">
+                                </div>
+                            </div>
+                            
+                            <button type="submit" 
+                                    class="w-full bg-white text-indigo-600 py-2 px-4 rounded-lg hover:bg-blue-50 transition duration-200 font-medium">
+                                Validate Card
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div id="result" class="mt-6 p-6 rounded-lg hidden">
+                        <p id="result-text" class="text-center text-xl font-semibold mb-4"></p>
+                        
+                        <div id="calculation-steps" class="mt-6 border-t pt-4">
+                            <h2 class="text-lg font-semibold mb-4 flex items-center">
+                                <i class="fas fa-calculator mr-2 text-indigo-500"></i>
+                                Calculation Steps:
+                            </h2>
+                            <div id="steps-container" class="space-y-4">
+                                <!-- Steps will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Explanation Tab -->
+                <div id="content-explanation" class="tab-content hidden">
+                    <div class="prose max-w-none">
+                        <h2 class="text-2xl font-bold text-indigo-800 mb-4">What is the Luhn Algorithm?</h2>
+                        
+                        <p class="mb-4">The Luhn algorithm, also known as the "modulus 10" or "mod 10" algorithm, is a simple checksum formula used to validate a variety of identification numbers, such as credit card numbers, IMEI numbers, and more.</p>
+                        
+                        <h3 class="text-xl font-semibold text-indigo-700 mt-6 mb-3">How It Works</h3>
+                        
+                        <div class="bg-indigo-50 p-4 rounded-lg mb-6">
+                            <ol class="list-decimal pl-5 space-y-2">
+                                <li>Starting from the rightmost digit (excluding the check digit) and moving left, double the value of every second digit.</li>
+                                <li>If doubling results in a number greater than 9, subtract 9 from the result.</li>
+                                <li>Sum all the digits in the resulting sequence.</li>
+                                <li>If the total modulo 10 is equal to 0, then the number is valid according to the Luhn algorithm.</li>
+                            </ol>
+                        </div>
+                        
+                        <h3 class="text-xl font-semibold text-indigo-700 mt-6 mb-3">Purpose</h3>
+                        
+                        <p class="mb-4">The primary purpose of the Luhn algorithm is to catch accidental errors, such as a single mistyped digit or a transposition of adjacent digits. It's not designed for security or to prevent fraud, but rather to quickly identify input errors.</p>
+                        
+                        <h3 class="text-xl font-semibold text-indigo-700 mt-6 mb-3">History</h3>
+                        
+                        <p>The algorithm was created by IBM scientist Hans Peter Luhn and described in U.S. Patent No. 2,950,048, filed in 1954 and granted in 1960. It has since become a standard for validating credit card numbers and other identification numbers.</p>
+                    </div>
+                </div>
+                
+                <!-- Examples Tab -->
+                <div id="content-examples" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold text-indigo-800 mb-6">Example Card Numbers</h2>
+                    
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Valid Examples -->
+                        <div class="bg-green-50 p-6 rounded-lg border border-green-200">
+                            <h3 class="text-lg font-semibold text-green-700 mb-4 flex items-center">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                Valid Card Numbers
+                            </h3>
+                            <ul class="space-y-3">
+                                <li class="example-card p-2 bg-white rounded border border-green-200 cursor-pointer hover:bg-green-100 transition">
+                                    <span class="font-mono">4532 7153 3790 1241</span>
+                                    <span class="text-xs text-gray-500 block">Visa</span>
+                                </li>
+                                <li class="example-card p-2 bg-white rounded border border-green-200 cursor-pointer hover:bg-green-100 transition">
+                                    <span class="font-mono">5555 5555 5555 4444</span>
+                                    <span class="text-xs text-gray-500 block">Mastercard</span>
+                                </li>
+                                <li class="example-card p-2 bg-white rounded border border-green-200 cursor-pointer hover:bg-green-100 transition">
+                                    <span class="font-mono">3782 8224 6310 005</span>
+                                    <span class="text-xs text-gray-500 block">American Express</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Invalid Examples -->
+                        <div class="bg-red-50 p-6 rounded-lg border border-red-200">
+                            <h3 class="text-lg font-semibold text-red-700 mb-4 flex items-center">
+                                <i class="fas fa-times-circle mr-2"></i>
+                                Invalid Card Numbers
+                            </h3>
+                            <ul class="space-y-3">
+                                <li class="example-card p-2 bg-white rounded border border-red-200 cursor-pointer hover:bg-red-100 transition">
+                                    <span class="font-mono">4532 7153 3790 1242</span>
+                                    <span class="text-xs text-gray-500 block">Invalid Visa</span>
+                                </li>
+                                <li class="example-card p-2 bg-white rounded border border-red-200 cursor-pointer hover:bg-red-100 transition">
+                                    <span class="font-mono">5555 5555 5555 5555</span>
+                                    <span class="text-xs text-gray-500 block">Invalid Mastercard</span>
+                                </li>
+                                <li class="example-card p-2 bg-white rounded border border-red-200 cursor-pointer hover:bg-red-100 transition">
+                                    <span class="font-mono">3782 8224 6310 006</span>
+                                    <span class="text-xs text-gray-500 block">Invalid American Express</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <p class="text-sm text-blue-800">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Click on any example card number to automatically fill it in the validator form.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="bg-white rounded-b-lg shadow-lg p-4 text-center text-gray-500 text-sm border-t border-gray-200">
+                <p>This is a demonstration of the Luhn algorithm for educational purposes only.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        document.getElementById('tab-validator').addEventListener('click', () => switchTab('validator'));
+        document.getElementById('tab-explanation').addEventListener('click', () => switchTab('explanation'));
+        document.getElementById('tab-examples').addEventListener('click', () => switchTab('examples'));
+        
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Show selected tab content
+            document.getElementById(`content-${tabName}`).classList.remove('hidden');
+            
+            // Update tab styles
+            document.querySelectorAll('[id^="tab-"]').forEach(tab => {
+                tab.classList.remove('border-indigo-500', 'text-indigo-600');
+                tab.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            document.getElementById(`tab-${tabName}`).classList.remove('border-transparent', 'text-gray-500');
+            document.getElementById(`tab-${tabName}`).classList.add('border-indigo-500', 'text-indigo-600');
+        }
+        
+        // Example card click handler
+        document.querySelectorAll('.example-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const cardNumber = card.querySelector('.font-mono').textContent;
+                document.getElementById('card_number').value = cardNumber;
+                switchTab('validator');
+                
+                // Optional: auto-fill example exp date and CVC
+                document.getElementById('exp_date').value = '12/25';
+                document.getElementById('cvc').value = '123';
+            });
+        });
+        
+        // Form submission
+        document.getElementById('validator-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const form = e.target;
+            const resultDiv = document.getElementById('result');
+            const resultText = document.getElementById('result-text');
+            const stepsContainer = document.getElementById('steps-container');
+            
+            try {
+                const response = await fetch('/validate', {
+                    method: 'POST',
+                    body: new FormData(form),
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.className = data.is_valid 
+                    ? 'mt-6 p-6 rounded-lg bg-green-50 border border-green-200 block' 
+                    : 'mt-6 p-6 rounded-lg bg-red-50 border border-red-200 block';
+                
+                resultText.innerHTML = data.is_valid 
+                    ? '<i class="fas fa-check-circle text-green-500 mr-2"></i> Valid card number!' 
+                    : '<i class="fas fa-times-circle text-red-500 mr-2"></i> Invalid card number!';
+                
+                // Add card type information
+                if (data.card_type) {
+                    const cardTypeElement = document.createElement('div');
+                    cardTypeElement.className = 'text-center text-gray-700 mb-4';
+                    cardTypeElement.innerHTML = `<span class="font-medium">Card Type:</span> ${data.card_type}`;
+                    resultDiv.insertBefore(cardTypeElement, document.getElementById('calculation-steps'));
+                }
+                
+                // Add expiration date and CVC validation results if provided
+                if (data.exp_date_valid !== null || data.cvc_valid !== null) {
+                    const additionalValidationElement = document.createElement('div');
+                    additionalValidationElement.className = 'flex justify-center space-x-4 mb-4';
+                    
+                    if (data.exp_date_valid !== null) {
+                        const expDateElement = document.createElement('div');
+                        expDateElement.className = data.exp_date_valid 
+                            ? 'text-green-600 flex items-center' 
+                            : 'text-red-600 flex items-center';
+                        expDateElement.innerHTML = data.exp_date_valid 
+                            ? '<i class="fas fa-check-circle mr-1"></i> Valid expiration date' 
+                            : '<i class="fas fa-times-circle mr-1"></i> Invalid expiration date';
+                        additionalValidationElement.appendChild(expDateElement);
+                    }
+                    
+                    if (data.cvc_valid !== null) {
+                        const cvcElement = document.createElement('div');
+                        cvcElement.className = data.cvc_valid 
+                            ? 'text-green-600 flex items-center' 
+                            : 'text-red-600 flex items-center';
+                        cvcElement.innerHTML = data.cvc_valid 
+                            ? '<i class="fas fa-check-circle mr-1"></i> Valid CVC' 
+                            : '<i class="fas fa-times-circle mr-1"></i> Invalid CVC';
+                        additionalValidationElement.appendChild(cvcElement);
+                    }
+                    
+                    resultDiv.insertBefore(additionalValidationElement, document.getElementById('calculation-steps'));
+                }
+                
+                // Display calculation steps
+                stepsContainer.innerHTML = '';
+                data.steps.forEach((step, index) => {
+                    const stepElement = document.createElement('div');
+                    stepElement.className = 'p-4 bg-white rounded-lg shadow border border-gray-200';
+                    stepElement.innerHTML = `
+                        <p class="text-gray-700 font-medium mb-2 flex items-center">
+                            <span class="bg-indigo-500 text-white rounded-full w-6 h-6 flex items-center justify-center mr-2">${index + 1}</span>
+                            ${step.description}
+                        </p>
+                        <p class="font-mono text-gray-800 bg-gray-50 p-3 rounded border border-gray-200">${step.digits}</p>
+                    `;
+                    stepsContainer.appendChild(stepElement);
+                });
+                
+                resultDiv.classList.remove('hidden');
+                
+                // Scroll to result
+                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } catch (error) {
+                resultDiv.className = 'mt-6 p-6 rounded-lg bg-red-50 border border-red-200 block';
+                resultText.innerHTML = '<i class="fas fa-exclamation-circle text-red-500 mr-2"></i> Error validating card number';
+                stepsContainer.innerHTML = '';
+                resultDiv.classList.remove('hidden');
+            }
+        });
+
+        // Format card number input
+        document.getElementById('card_number').addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 0) {
+                value = value.match(/.{1,4}/g).join(' ');
+            }
+            e.target.value = value;
+        });
+        
+        // Format expiration date
+        document.getElementById('exp_date').addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            e.target.value = value;
+        });
+        
+        // Format CVC (numbers only)
+        document.getElementById('cvc').addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '');
+        });
+    </script>
+</body>
+</html> 
